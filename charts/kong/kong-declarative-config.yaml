@@ -1,0 +1,133 @@
+# Kong Declarative Configuration
+# This file defines all Kong services, routes, and plugins
+# Apply with: kubectl apply -f charts/kong/kong-declarative-config.yaml
+
+_format_version: "3.0"
+
+services:
+  - name: prometheus
+    url: http://prometheus.monitoring.svc.cluster.local:9090
+    routes:
+      - name: prometheus-route
+        paths:
+          - /prometheus
+        strip_path: true
+        preserve_host: false
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - OPTIONS
+          headers:
+            - Accept
+            - Content-Type
+            - Authorization
+          credentials: true
+          max_age: 3600
+
+  - name: grafana
+    url: http://grafana.monitoring.svc.cluster.local:3000
+    routes:
+      - name: grafana-route
+        paths:
+          - /grafana
+        strip_path: false
+        preserve_host: false
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+          headers:
+            - Accept
+            - Accept-Language
+            - Content-Type
+            - Authorization
+            - X-Grafana-Org-Id
+            - X-Datasource-Uid
+            - X-Panel-Id
+            - X-Plugin-Id
+          credentials: true
+          max_age: 3600
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "Host:$http_host"
+
+  - name: jenkins
+    url: http://jenkins.cicd.svc.cluster.local:8080
+    routes:
+      - name: jenkins-route
+        paths:
+          - /jenkins
+        strip_path: false
+        preserve_host: false
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+          headers:
+            - Accept
+            - Content-Type
+            - Authorization
+            - X-Requested-With
+          credentials: true
+          max_age: 3600
+
+  - name: alertmanager
+    url: http://alertmanager.monitoring.svc.cluster.local:9093
+    routes:
+      - name: alertmanager-route
+        paths:
+          - /alertmanager
+        strip_path: true
+        preserve_host: false
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+          headers:
+            - Accept
+            - Content-Type
+            - Authorization
+          credentials: true
+          max_age: 3600
+
+  # Loki service removed - Grafana accesses Loki directly within cluster
+  # No external Kong route needed for Loki API
+
+# Global plugins (applied to all routes)
+plugins:
+  - name: prometheus
+    config:
+      per_consumer: true
+      status_code_metrics: true
+      latency_metrics: true
+      bandwidth_metrics: true
+      upstream_health_metrics: true
+

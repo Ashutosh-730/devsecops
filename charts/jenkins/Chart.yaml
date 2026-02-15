@@ -1,0 +1,7 @@
+apiVersion: v2
+name: jenkins
+description: Jenkins CI/CD automation server
+type: application
+version: 1.0.0
+appVersion: "2.426.1-lts"
+

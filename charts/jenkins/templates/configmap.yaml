@@ -1,0 +1,13 @@
+{{- if .Values.casc.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jenkins-casc-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: jenkins
+data:
+  jenkins.yaml: |
+{{ .Values.casc.config | indent 4 }}
+{{- end }}
+

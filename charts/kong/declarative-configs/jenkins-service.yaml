@@ -1,0 +1,48 @@
+# Jenkins Service and Route Configuration
+_format_version: "3.0"
+
+services:
+  - name: jenkins
+    url: http://jenkins.cicd.svc.cluster.local:8080
+    routes:
+      - name: jenkins-route
+        paths:
+          - /jenkins
+        strip_path: false
+        preserve_host: false
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+            - PATCH
+          headers:
+            - Accept
+            - Content-Type
+            - Authorization
+            - X-Requested-With
+            - Jenkins-Crumb
+            - X-Jenkins
+            - X-Jenkins-Session
+          exposed_headers:
+            - Jenkins-Crumb
+            - X-Jenkins
+            - X-Jenkins-Session
+          credentials: true
+          max_age: 3600
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "X-Forwarded-Proto:http"
+              - "X-Forwarded-Host:localhost:32000"
+              - "X-Forwarded-Port:32000"
+              - "X-Forwarded-Prefix:/jenkins"
+
+

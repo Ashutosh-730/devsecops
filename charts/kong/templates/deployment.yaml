@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: kong
+    release: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: kong
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: kong
+        release: {{ .Release.Name }}
+    spec:
+      initContainers:
+        - name: kong-migration
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: [ "/bin/sh", "-c", "kong migrations bootstrap" ]
+          env:
+            - name: KONG_DATABASE
+              value: "{{ .Values.env.database }}"
+            - name: KONG_PG_HOST
+              value: "{{ .Values.env.pg_host }}"
+            - name: KONG_PG_PORT
+              value: "{{ .Values.env.pg_port }}"
+            - name: KONG_PG_DATABASE
+              value: "{{ .Values.env.pg_database }}"
+            - name: KONG_PG_USER
+              value: "{{ .Values.env.pg_user }}"
+            - name: KONG_PG_PASSWORD
+              value: "{{ .Values.env.pg_password }}"
+      containers:
+        - name: kong
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: KONG_DATABASE
+              value: "{{ .Values.env.database }}"
+            - name: KONG_PG_HOST
+              value: "{{ .Values.env.pg_host }}"
+            - name: KONG_PG_PORT
+              value: "{{ .Values.env.pg_port }}"
+            - name: KONG_PG_DATABASE
+              value: "{{ .Values.env.pg_database }}"
+            - name: KONG_PG_USER
+              value: "{{ .Values.env.pg_user }}"
+            - name: KONG_PG_PASSWORD
+              value: "{{ .Values.env.pg_password }}"
+            - name: KONG_PROXY_ACCESS_LOG
+              value: "{{ .Values.env.proxy_access_log }}"
+            - name: KONG_ADMIN_ACCESS_LOG
+              value: "{{ .Values.env.admin_access_log }}"
+            - name: KONG_PROXY_ERROR_LOG
+              value: "{{ .Values.env.proxy_error_log }}"
+            - name: KONG_ADMIN_ERROR_LOG
+              value: "{{ .Values.env.admin_error_log }}"
+            - name: KONG_ADMIN_LISTEN
+              value: "{{ .Values.env.admin_listen }}"
+            - name: KONG_ADMIN_GUI_LISTEN
+              value: "{{ .Values.env.admin_gui_listen }}"
+            - name: KONG_ADMIN_GUI_URL
+              value: "{{ .Values.env.admin_gui_url }}"
+            - name: KONG_ADMIN_API_URI
+              value: "{{ .Values.env.admin_api_uri }}"
+            - name: KONG_ADMIN_GUI_ACCESS_LOG
+              value: "{{ .Values.env.admin_gui_access_log }}"
+            - name: KONG_ADMIN_GUI_ERROR_LOG
+              value: "{{ .Values.env.admin_gui_error_log }}"
+            - name: KONG_ADMIN_GUI_API_URL
+              value: "{{ .Values.env.admin_gui_api_url }}"
+            - name: KONG_ADMIN_GUI_PATH
+              value: "{{ .Values.env.admin_gui_path }}"
+          ports:
+            - name: proxy
+              containerPort: 8000
+              protocol: TCP
+            - name: proxy-ssl
+              containerPort: 8443
+              protocol: TCP
+            - name: admin
+              containerPort: 8001
+              protocol: TCP
+            - name: manager
+              containerPort: 8002
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: admin
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: admin
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

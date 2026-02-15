@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-proxy
+  labels:
+    app: kong
+    release: {{ .Release.Name }}
+spec:
+  type: {{ .Values.proxy.type }}
+  ports:
+    - name: http
+      port: {{ .Values.proxy.httpPort }}
+      targetPort: proxy
+      {{- if eq .Values.proxy.type "NodePort" }}
+      nodePort: {{ .Values.proxy.nodePort }}
+      {{- end }}
+    - name: https
+      port: {{ .Values.proxy.httpsPort }}
+      targetPort: proxy-ssl
+  selector:
+    app: kong
+    release: {{ .Release.Name }}
+---
+{{- if .Values.admin.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-admin
+  labels:
+    app: kong
+    release: {{ .Release.Name }}
+spec:
+  type: {{ .Values.admin.type }}
+  ports:
+    - name: admin
+      port: {{ .Values.admin.port }}
+      targetPort: admin
+      {{- if eq .Values.admin.type "NodePort" }}
+      nodePort: {{ .Values.admin.nodePort }}
+      {{- end }}
+  selector:
+    app: kong
+    release: {{ .Release.Name }}
+{{- end }}
+---
+{{- if .Values.manager.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-manager
+  labels:
+    app: kong
+    release: {{ .Release.Name }}
+spec:
+  type: {{ .Values.manager.type }}
+  ports:
+    - name: manager
+      port: {{ .Values.manager.port }}
+      targetPort: manager
+      {{- if eq .Values.manager.type "NodePort" }}
+      nodePort: {{ .Values.manager.nodePort }}
+      {{- end }}
+  selector:
+    app: kong
+    release: {{ .Release.Name }}
+{{- end }}

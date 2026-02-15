@@ -1,0 +1,16 @@
+{{- if .Values.jobs.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jenkins-jobs
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: jenkins
+data:
+{{- range $path, $_ := .Files.Glob "jobs/*.xml" }}
+  {{ base $path }}: |
+{{ $.Files.Get $path | indent 4 }}
+{{- end }}
+{{- end }}
+
+

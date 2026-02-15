@@ -1,0 +1,29 @@
+# Prometheus Service and Route Configuration
+_format_version: "3.0"
+
+services:
+  - name: prometheus
+    url: http://prometheus.monitoring.svc.cluster.local:9090
+    routes:
+      - name: prometheus-route
+        paths:
+          - /prometheus
+        strip_path: true
+        preserve_host: false
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - OPTIONS
+          headers:
+            - Accept
+            - Content-Type
+            - Authorization
+          credentials: true
+          max_age: 3600
+
+

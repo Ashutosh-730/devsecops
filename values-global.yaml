@@ -1,0 +1,153 @@
+# Global Configuration for DevSecOps Stack
+# This file contains shared configuration used across all Helm charts
+
+# Global settings
+global:
+  # Kubernetes cluster configuration
+  clusterDomain: cluster.local
+  
+  # Namespace configuration
+  namespaces:
+    kong: kong
+    monitoring: monitoring
+    security: security
+    cicd: cicd
+  
+  # Kong Gateway Integration
+  kong:
+    enabled: true  # Set to false for direct access, true to route all services through Kong Gateway
+    namespace: kong
+    proxyService: kong-proxy
+    proxyPort: 8000
+    adminService: kong-admin
+    adminPort: 8001
+    # Internal cluster URL for Kong proxy
+    proxyUrl: http://kong-proxy.kong.svc.cluster.local:8000
+    # External access URLs (when using port-forward or NodePort)
+    externalProxyUrl: http://localhost:32000
+    externalAdminUrl: http://localhost:32001
+  
+  # Monitoring Stack Configuration
+  monitoring:
+    prometheus:
+      enabled: true
+      namespace: monitoring
+      service: prometheus
+      port: 9090
+      # Direct access URL
+      url: http://prometheus.monitoring.svc.cluster.local:9090
+      # External access
+      externalUrl: http://localhost:32090
+      nodePort: 32090
+    
+    grafana:
+      enabled: true
+      namespace: monitoring
+      service: grafana
+      port: 3000
+      # Direct access URL
+      url: http://grafana.monitoring.svc.cluster.local:3000
+      # External access
+      externalUrl: http://localhost:32300
+      nodePort: 32300
+      # Admin credentials
+      adminUser: admin
+      adminPassword: admin
+    
+    loki:
+      enabled: true
+      namespace: monitoring
+      service: loki
+      port: 3100
+      # Direct access URL
+      url: http://loki.monitoring.svc.cluster.local:3100
+    
+    alertmanager:
+      enabled: false
+      namespace: monitoring
+      service: alertmanager
+      port: 9093
+      url: http://alertmanager.monitoring.svc.cluster.local:9093
+  
+  # Security & Identity Management
+  security:
+    namespace: security
+  
+  # Storage Configuration
+  storage:
+    storageClass: standard
+    # Default sizes
+    prometheus:
+      size: 5Gi
+    grafana:
+      size: 5Gi
+    loki:
+      size: 5Gi
+    kong:
+      postgres:
+        size: 5Gi
+  
+  # Resource Defaults
+  resources:
+    small:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    
+    medium:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+    
+    large:
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+      requests:
+        cpu: 500m
+        memory: 512Mi
+  
+  # Image Pull Policy
+  imagePullPolicy: IfNotPresent
+  
+  # Security Context
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
+  
+  # Service Account
+  serviceAccount:
+    create: true
+    automountServiceAccountToken: true
+
+# Chart-specific overrides (optional)
+# These can be used to override global settings for specific charts
+
+# Kong specific settings
+kong:
+  replicaCount: 1
+  database: postgres
+  
+# Prometheus specific settings  
+prometheus:
+  retention: 15d
+  scrapeInterval: 15s
+  evaluationInterval: 15s
+
+# Grafana specific settings
+grafana:
+  plugins:
+    - grafana-piechart-panel
+    - grafana-clock-panel
+
+# Loki specific settings
+loki:
+  retention: 168h  # 7 days
+

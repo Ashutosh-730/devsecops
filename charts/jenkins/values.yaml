@@ -1,0 +1,90 @@
+replicaCount: 1
+
+image:
+  repository: jenkins/jenkins
+  tag: 2.426.1-lts
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  port: 8080
+  nodePort: 32080
+  agentPort: 50000
+
+admin:
+  user: admin
+  password: admin
+
+resources:
+  limits:
+    cpu: 2000m
+    memory: 4Gi
+  requests:
+    cpu: 500m
+    memory: 2Gi
+
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: standard
+
+# Jenkins Configuration as Code (JCasC)
+casc:
+  enabled: true
+  config: |
+    jenkins:
+      systemMessage: "Jenkins configured automatically by JCasC"
+      numExecutors: 2
+      mode: NORMAL
+      scmCheckoutRetryCount: 3
+      
+      securityRealm:
+        local:
+          allowsSignup: false
+          users:
+            - id: "admin"
+              password: "admin"
+      
+      authorizationStrategy:
+        loggedInUsersCanDoAnything:
+          allowAnonymousRead: false
+      
+      # Configure CSRF protection for proxy compatibility
+      crumbIssuer:
+        standard:
+          excludeClientIPFromCrumb: true
+      
+      # Disable security for easier access (development only)
+      disabledAdministrativeMonitors:
+        - "hudson.diagnosis.ReverseProxySetupMonitor"
+    
+    security:
+      # Enable proxy compatibility
+      apiToken:
+        creationOfLegacyTokenEnabled: false
+        tokenGenerationOnCreationEnabled: false
+        usageStatisticsEnabled: true
+    
+    unclassified:
+      location:
+        url: "http://localhost:32000/jenkins"
+      
+      # Configure for reverse proxy
+      globalLibraries:
+        libraries: []
+
+# Plugins to install
+plugins:
+  - kubernetes:latest
+  - workflow-aggregator:latest
+  - git:latest
+  - configuration-as-code:latest
+  - prometheus:latest
+  - job-dsl:latest
+
+# Jenkins Jobs Configuration
+jobs:
+  enabled: true
+  # Jobs will be loaded from charts/jenkins/jobs/ directory
+  # Each XML file represents a Jenkins job configuration
+

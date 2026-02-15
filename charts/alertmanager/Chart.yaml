@@ -1,0 +1,7 @@
+apiVersion: v2
+name: alertmanager
+description: Prometheus AlertManager for alert management and routing
+type: application
+version: 1.0.0
+appVersion: "0.26.0"
+

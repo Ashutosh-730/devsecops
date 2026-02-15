@@ -1,0 +1,31 @@
+# AlertManager Service and Route Configuration
+_format_version: "3.0"
+
+services:
+  - name: alertmanager
+    url: http://alertmanager.monitoring.svc.cluster.local:9093
+    routes:
+      - name: alertmanager-route
+        paths:
+          - /alertmanager
+        strip_path: true
+        preserve_host: false
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+          headers:
+            - Accept
+            - Content-Type
+            - Authorization
+          credentials: true
+          max_age: 3600
+
+

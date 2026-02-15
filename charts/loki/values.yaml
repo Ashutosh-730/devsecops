@@ -1,0 +1,46 @@
+# Use global configuration from values-global.yaml
+# Override with: helm install -f values-global.yaml -f charts/loki/values.yaml
+
+replicaCount: 1
+
+loki:
+  image:
+    repository: grafana/loki
+    tag: 2.9.0
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    port: 3100
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: standard
+
+promtail:
+  image:
+    repository: grafana/promtail
+    tag: 2.9.0
+    pullPolicy: IfNotPresent
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 64Mi
+
+  config:
+    lokiAddress: http://loki:3100/loki/api/v1/push
+
+

@@ -1,0 +1,21 @@
+{{- if .Values.postgresql.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-postgres
+  labels:
+    app: kong-postgres
+    release: {{ .Release.Name }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: postgres
+      port: {{ .Values.postgresql.port }}
+      targetPort: postgres
+      protocol: TCP
+  selector:
+    app: kong-postgres
+    release: {{ .Release.Name }}
+{{- end }}
+
+

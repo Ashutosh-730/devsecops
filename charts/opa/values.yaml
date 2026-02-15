@@ -1,0 +1,29 @@
+replicaCount: 1
+
+image:
+  repository: openpolicyagent/opa
+  tag: "0.60.0-static"
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  port: 8181
+  nodePort: 32010
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 64Mi
+
+# Default policy configmap
+defaultPolicy:
+  enabled: false
+  name: example-policy
+  content: |
+    package example
+    import rego.v1
+    default allowed := false
+    allowed if input.method == "GET"
