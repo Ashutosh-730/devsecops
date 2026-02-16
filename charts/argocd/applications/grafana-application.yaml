@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: file:///Users/ashutosh/Documents/devsecops
+    repoURL: https://github.com/Ashutosh-730/devsecops
     targetRevision: 0549622b87bbaeb4e451c6618ef4697074168d9c
     path: charts/grafana
     helm:
