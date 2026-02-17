@@ -13,11 +13,7 @@ data:
       - name: {{ .Values.datasources.prometheus.name }}
         type: {{ .Values.datasources.prometheus.type }}
         access: {{ .Values.datasources.prometheus.access }}
-        {{- if .Values.global.applications.kong.enabled }}
-        url: {{ .Values.global.applications.kong.externalProxyUrl }}/prometheus
-        {{- else }}
         url: {{ .Values.datasources.prometheus.url }}
-        {{- end }}
         isDefault: {{ .Values.datasources.prometheus.isDefault }}
         editable: true
     {{- end }}
