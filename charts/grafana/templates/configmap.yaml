@@ -59,7 +59,9 @@ metadata:
     app: grafana
     dashboard: kong
 data:
-  kong-official-7424.json: |-
-{{ .Files.Get "dashboards/kong-official-7424.json" | indent 4 }}
+  kong-vitals-11870.json: |-
+{{ .Files.Get "dashboards/kong-vitals-11870.json" | indent 4 }}
+  kong-official-17269.json: |-
+{{ .Files.Get "dashboards/kong-official-17269.json" | indent 4 }}
 {{- end }}
 
