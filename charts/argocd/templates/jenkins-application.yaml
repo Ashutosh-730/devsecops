@@ -1,26 +1,27 @@
+{{- if .Values.applications.jenkins.enabled }}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kong
+  name: jenkins
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    repoURL: https://github.com/Ashutosh-730/devsecops
-    targetRevision: HEAD
-    path: charts/kong
+    repoURL: {{ .Values.git.repoURL }}
+    targetRevision: {{ .Values.git.targetRevision }}
+    path: charts/jenkins
     helm:
       valueFiles:
         - ../../values-global.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: kong
+    namespace: cicd
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-
+{{- end }}

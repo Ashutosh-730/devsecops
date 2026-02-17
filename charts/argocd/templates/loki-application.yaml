@@ -1,16 +1,17 @@
+{{- if .Values.applications.loki.enabled }}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: alertmanager
+  name: loki
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    repoURL: https://github.com/Ashutosh-730/devsecops
-    targetRevision: HEAD
-    path: charts/alertmanager
+    repoURL: {{ .Values.git.repoURL }}
+    targetRevision: {{ .Values.git.targetRevision }}
+    path: charts/loki
     helm:
       valueFiles:
         - ../../values-global.yaml
@@ -23,4 +24,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-
+{{- end }}

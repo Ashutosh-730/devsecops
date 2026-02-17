@@ -1,0 +1,24 @@
+# ArgoCD Applications Chart Values
+# This chart manages ArgoCD Application resources
+
+git:
+  repoURL: https://github.com/Ashutosh-730/devsecops
+  targetRevision: ashutosh-dev
+
+# Application enable/disable flags
+# Set enabled: false to prevent an application from being deployed
+applications:
+  kong:
+    enabled: true
+  jenkins:
+    enabled: true
+  grafana:
+    enabled: true
+  prometheus:
+    enabled: true
+  alertmanager:
+    enabled: true
+  loki:
+    enabled: true
+
+

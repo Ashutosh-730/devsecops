@@ -166,11 +166,13 @@ if [ $FAIL_COUNT -eq 0 ]; then
     echo "=========================================="
     echo ""
     echo "Access services via Kong:"
-    echo "  • ArgoCD:       http://localhost:8000/argocd"
-    echo "  • Jenkins:      http://localhost:8000/jenkins"
-    echo "  • Grafana:      http://localhost:8000/grafana"
-    echo "  • Prometheus:   http://localhost:8000/prometheus"
-    echo "  • AlertManager: http://localhost:8000/alertmanager"
+    echo "  • Kong Manager:  http://localhost:8000/kongui"
+    echo "  • Kong Admin:    http://localhost:8000/kong/admin"
+    echo "  • ArgoCD:        http://localhost:8000/argocd"
+    echo "  • Jenkins:       http://localhost:8000/jenkins"
+    echo "  • Grafana:       http://localhost:8000/grafana"
+    echo "  • Prometheus:    http://localhost:8000/prometheus"
+    echo "  • AlertManager:  http://localhost:8000/alertmanager"
     echo ""
     exit 0
 else

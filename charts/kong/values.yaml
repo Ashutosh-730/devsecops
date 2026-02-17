@@ -36,12 +36,12 @@ env:
   admin_error_log: /dev/stderr
   admin_listen: "0.0.0.0:8001, 0.0.0.0:8444 ssl"
   admin_gui_listen: "0.0.0.0:8002"
-  admin_gui_url: "http://localhost:8002"
+  admin_gui_url: "http://localhost:8000/kongui"
   admin_api_uri: "http://localhost:8001"
   admin_gui_access_log: /dev/stdout
   admin_gui_error_log: /dev/stderr
   admin_gui_api_url: "http://localhost:8001"
-  admin_gui_path: "/"
+  admin_gui_path: "/kongui"
   # Enable RBAC and Basic Auth for Kong Manager (Enterprise feature)
   # Note: These features require Kong Enterprise license
   enforce_rbac: "on"

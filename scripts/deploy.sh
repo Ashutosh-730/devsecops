@@ -48,9 +48,11 @@ kubectl patch configmap argocd-cmd-params-cm -n argocd --type merge -p '{"data":
 echo -e "${GREEN}✓ ArgoCD configuration updated${NC}"
 echo ""
 
-echo -e "${YELLOW}Step 5: Deploying applications...${NC}"
-kubectl apply -f charts/argocd/applications/
-echo -e "${GREEN}✓ Applications deployed${NC}"
+echo -e "${YELLOW}Step 5: Deploying ArgoCD applications chart...${NC}"
+helm upgrade --install argocd-apps charts/argocd \
+  --namespace argocd \
+  --create-namespace
+echo -e "${GREEN}✓ ArgoCD applications chart deployed${NC}"
 echo ""
 
 echo -e "${YELLOW}Step 6: Waiting for applications to sync...${NC}"
@@ -96,6 +98,7 @@ echo -e "  Admin:    ${GREEN}http://localhost:8001${NC}"
 echo -e "  Manager:  ${GREEN}http://localhost:8002${NC}"
 echo ""
 echo -e "${YELLOW}Application Access (via Kong API Gateway):${NC}"
+echo -e "  Kong Manager:  ${GREEN}http://localhost:8000/kongui${NC}"
 echo -e "  ArgoCD:        ${GREEN}http://localhost:8000/argocd${NC}"
 echo -e "    Username:    ${GREEN}admin${NC}"
 echo -e "    Password:    ${GREEN}${ARGOCD_PASSWORD}${NC}"

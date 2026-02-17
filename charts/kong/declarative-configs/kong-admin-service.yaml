@@ -1,0 +1,33 @@
+# Kong Admin API Service Configuration
+_format_version: "3.0"
+
+services:
+  - name: kong-admin
+    url: http://kong-admin.kong.svc.cluster.local:8001
+    routes:
+      - name: kong-admin-route
+        paths:
+          - /kong/admin
+        strip_path: true
+        preserve_host: false
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+            - PATCH
+          headers:
+            - Accept
+            - Content-Type
+            - Authorization
+            - X-Requested-With
+          credentials: true
+          max_age: 3600
+
+
