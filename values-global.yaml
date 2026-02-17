@@ -21,11 +21,13 @@ global:
     proxyPort: 8000
     adminService: kong-admin
     adminPort: 8001
+    managerPort: 8002
     # Internal cluster URL for Kong proxy
     proxyUrl: http://kong-proxy.kong.svc.cluster.local:8000
     # External access URLs (when using port-forward or NodePort)
-    externalProxyUrl: http://localhost:32000
-    externalAdminUrl: http://localhost:32001
+    externalProxyUrl: http://localhost:8000
+    externalAdminUrl: http://localhost:8001
+    externalManagerUrl: http://localhost:8002
   
   # Monitoring Stack Configuration
   monitoring:

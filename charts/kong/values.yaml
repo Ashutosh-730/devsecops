@@ -9,22 +9,19 @@ image:
   pullPolicy: IfNotPresent
 
 proxy:
-  type: NodePort
+  type: ClusterIP
   httpPort: 8000
   httpsPort: 8443
-  nodePort: 32000
 
 admin:
   enabled: true
-  type: NodePort
+  type: ClusterIP
   port: 8001
-  nodePort: 32001
 
 manager:
   enabled: true
-  type: NodePort
+  type: ClusterIP
   port: 8002
-  nodePort: 32002
 
 env:
   database: "postgres"
@@ -39,11 +36,11 @@ env:
   admin_error_log: /dev/stderr
   admin_listen: "0.0.0.0:8001, 0.0.0.0:8444 ssl"
   admin_gui_listen: "0.0.0.0:8002"
-  admin_gui_url: "http://localhost:32002"
-  admin_api_uri: "http://localhost:32001"
+  admin_gui_url: "http://localhost:8002"
+  admin_api_uri: "http://localhost:8001"
   admin_gui_access_log: /dev/stdout
   admin_gui_error_log: /dev/stderr
-  admin_gui_api_url: "http://localhost:32001"
+  admin_gui_api_url: "http://localhost:8001"
   admin_gui_path: "/"
   # Enable RBAC and Basic Auth for Kong Manager (Enterprise feature)
   # Note: These features require Kong Enterprise license
