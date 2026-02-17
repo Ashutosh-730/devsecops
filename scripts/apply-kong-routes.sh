@@ -5,7 +5,7 @@
 
 set -e
 
-KONG_ADMIN_URL="${KONG_ADMIN_URL:-http://localhost:32001}"
+KONG_ADMIN_URL="${KONG_ADMIN_URL:-http://localhost:8001}"
 CONFIG_DIR="charts/kong/declarative-configs"
 
 echo "=========================================="
@@ -23,7 +23,7 @@ if ! curl -s -f "$KONG_ADMIN_URL" > /dev/null 2>&1; then
     echo ""
     echo "Please ensure:"
     echo "  1. Kong is running"
-    echo "  2. Port forwarding is active: kubectl port-forward -n gateway svc/kong-admin 32001:8001"
+    echo "  2. Port forwarding is active: kubectl port-forward -n kong svc/kong-admin 8001:8001"
     echo "  3. Or set KONG_ADMIN_URL environment variable"
     exit 1
 fi
@@ -166,10 +166,11 @@ if [ $FAIL_COUNT -eq 0 ]; then
     echo "=========================================="
     echo ""
     echo "Access services via Kong:"
-    echo "  • Prometheus:   http://localhost:32000/prometheus"
-    echo "  • Grafana:      http://localhost:32000/grafana"
-    echo "  • Jenkins:      http://localhost:32000/jenkins"
-    echo "  • AlertManager: http://localhost:32000/alertmanager"
+    echo "  • ArgoCD:       http://localhost:8000/argocd"
+    echo "  • Jenkins:      http://localhost:8000/jenkins"
+    echo "  • Grafana:      http://localhost:8000/grafana"
+    echo "  • Prometheus:   http://localhost:8000/prometheus"
+    echo "  • AlertManager: http://localhost:8000/alertmanager"
     echo ""
     exit 0
 else

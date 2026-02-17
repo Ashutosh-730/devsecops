@@ -6,9 +6,8 @@ image:
   pullPolicy: IfNotPresent
 
 service:
-  type: NodePort
+  type: ClusterIP
   port: 8080
-  nodePort: 32080
   agentPort: 50000
 
 admin:
@@ -67,7 +66,7 @@ casc:
     
     unclassified:
       location:
-        url: "http://localhost:32000/jenkins"
+        url: "http://localhost:8000/jenkins"
       
       # Configure for reverse proxy
       globalLibraries:

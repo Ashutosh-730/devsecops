@@ -9,9 +9,8 @@ image:
   pullPolicy: IfNotPresent
 
 service:
-  type: NodePort
+  type: ClusterIP
   port: 9090
-  nodePort: 32090
 
 resources:
   limits:

@@ -9,9 +9,8 @@ image:
   pullPolicy: IfNotPresent
 
 service:
-  type: NodePort
+  type: ClusterIP
   port: 3000
-  nodePort: 32300
 
 admin:
   user: admin
@@ -66,7 +65,7 @@ env:
   GF_SECURITY_ADMIN_USER: admin
   GF_SECURITY_ADMIN_PASSWORD: admin
   GF_INSTALL_PLUGINS: grafana-piechart-panel,grafana-clock-panel
-  GF_SERVER_ROOT_URL: http://localhost:32000/grafana
+  GF_SERVER_ROOT_URL: http://localhost:8000/grafana
   GF_SERVER_SERVE_FROM_SUB_PATH: "true"
   GF_AUTH_ANONYMOUS_ENABLED: "false"
 
