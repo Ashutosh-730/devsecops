@@ -7,6 +7,7 @@ metadata:
     app: grafana
 spec:
   replicas: {{ .Values.global.applications.grafana.replicaCount | default 1 }}
+  revisionHistoryLimit: {{ .Values.global.revisionHistoryLimit | default 1 }}
   selector:
     matchLabels:
       app: grafana

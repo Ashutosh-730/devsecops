@@ -1,8 +1,6 @@
 # OPA Chart Values
 # Uses global configuration from values-global.yaml
 
-replicaCount: 1
-
 image:
   repository: openpolicyagent/opa
   tag: "0.60.0-static"

@@ -9,8 +9,6 @@ service:
 # Storage configuration - uses global.storage.storageClass and global.storage.sizes.small
 persistence:
   enabled: true
-  size: 2Gi
-  storageClass: standard
 
 # Resources - uses global.resources.small
 # Override only if needed for specific requirements

@@ -6,7 +6,8 @@ metadata:
     app: opa
     release: {{ .Release.Name }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.global.applications.loki.replicaCount | default 1 }}
+  revisionHistoryLimit: {{ .Values.global.revisionHistoryLimit | default 1 }}
   selector:
     matchLabels:
       app: opa

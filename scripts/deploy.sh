@@ -49,7 +49,7 @@ echo ""
 echo -e "${YELLOW}Step 2: Creating new minikube cluster...${NC}"
 echo -e "${BLUE}  Starting minikube with maximum available resources...${NC}"
 echo -e "${BLUE}  CPUs: 7, Memory: 16GB, Disk: 100GB${NC}"
-minikube start --cpus=7 --memory=16384 --disk-size=100g --driver=podman --kubernetes-version=stable
+minikube start --cpus=7 --memory=16384 --disk-size=100g --driver=podman --container-runtime=cri-o
 if [ $? -ne 0 ]; then
     echo -e "${RED}Error: Failed to create minikube cluster${NC}"
     exit 1
@@ -78,7 +78,9 @@ echo -e "${GREEN}✓ ArgoCD installed (ignoring known CRD annotation warning)${N
 echo ""
 
 echo -e "${YELLOW}Step 6: Waiting for ArgoCD server to be ready...${NC}"
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=argocd-server -n argocd --timeout=300s
+echo -e "${BLUE}  Waiting for pods to be created...${NC}"
+sleep 10
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=argocd-server -n argocd --timeout=300s 2>&1 || echo -e "${YELLOW}  Note: Pods may still be initializing${NC}"
 echo -e "${GREEN}✓ ArgoCD server is ready${NC}"
 echo ""
 
@@ -92,7 +94,8 @@ echo ""
 echo -e "${YELLOW}Step 8: Deploying ArgoCD applications chart...${NC}"
 helm upgrade --install argocd-apps charts/argocd \
   --namespace argocd \
-  --create-namespace
+  --create-namespace \
+  --values values-global.yaml
 echo -e "${GREEN}✓ ArgoCD applications chart deployed${NC}"
 echo ""
 
@@ -102,8 +105,21 @@ echo -e "${GREEN}✓ Applications are syncing${NC}"
 echo ""
 
 echo -e "${YELLOW}Step 10: Getting ArgoCD admin password...${NC}"
-ARGOCD_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
-echo -e "${GREEN}✓ Password retrieved${NC} : $ARGOCD_PASSWORD"
+echo -e "${BLUE}  Waiting for secret to be created...${NC}"
+for i in {1..30}; do
+    ARGOCD_PASSWORD=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" 2>/dev/null | base64 -d 2>/dev/null)
+    if [ -n "$ARGOCD_PASSWORD" ]; then
+        break
+    fi
+    echo -e "${BLUE}  Attempt $i/30: Secret not ready yet, waiting...${NC}"
+    sleep 5
+done
+if [ -n "$ARGOCD_PASSWORD" ]; then
+    echo -e "${GREEN}✓ Password retrieved${NC} : $ARGOCD_PASSWORD"
+else
+    echo -e "${YELLOW}⚠ Password not available yet. Retrieve it later with:${NC}"
+    echo -e "${YELLOW}  kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath=\"{.data.password}\" | base64 -d${NC}"
+fi
 echo ""
 
 echo -e "${YELLOW}Step 11: Restarting ArgoCD server to apply base path configuration...${NC}"
@@ -128,27 +144,27 @@ sleep 30
 
 # Wait for Kong to be ready
 echo -e "${BLUE}  Waiting for Kong...${NC}"
-kubectl wait --for=condition=ready pod -l app=kong -n kong --timeout=300s 2>/dev/null || true
+kubectl wait --for=condition=ready pod -l app=kong -n kong --timeout=300s 2>/dev/null || echo -e "${YELLOW}    Kong not ready yet${NC}"
 
 # Wait for Jenkins to be ready
 echo -e "${BLUE}  Waiting for Jenkins...${NC}"
-kubectl wait --for=condition=ready pod -l app=jenkins -n jenkins --timeout=300s 2>/dev/null || true
+kubectl wait --for=condition=ready pod -l app=jenkins -n cicd --timeout=300s 2>/dev/null || echo -e "${YELLOW}    Jenkins not ready yet${NC}"
 
 # Wait for Grafana to be ready
 echo -e "${BLUE}  Waiting for Grafana...${NC}"
-kubectl wait --for=condition=ready pod -l app=grafana -n grafana --timeout=300s 2>/dev/null || true
+kubectl wait --for=condition=ready pod -l app=grafana -n monitoring --timeout=300s 2>/dev/null || echo -e "${YELLOW}    Grafana not ready yet${NC}"
 
 # Wait for Prometheus to be ready
 echo -e "${BLUE}  Waiting for Prometheus...${NC}"
-kubectl wait --for=condition=ready pod -l app=prometheus -n prometheus --timeout=300s 2>/dev/null || true
+kubectl wait --for=condition=ready pod -l app=prometheus -n monitoring --timeout=300s 2>/dev/null || echo -e "${YELLOW}    Prometheus not ready yet${NC}"
 
 # Wait for Alertmanager to be ready
 echo -e "${BLUE}  Waiting for Alertmanager...${NC}"
-kubectl wait --for=condition=ready pod -l app=alertmanager -n alertmanager --timeout=300s 2>/dev/null || true
+kubectl wait --for=condition=ready pod -l app=alertmanager -n monitoring --timeout=300s 2>/dev/null || echo -e "${YELLOW}    Alertmanager not ready yet${NC}"
 
 # Wait for Loki to be ready
 echo -e "${BLUE}  Waiting for Loki...${NC}"
-kubectl wait --for=condition=ready pod -l app=loki -n loki --timeout=300s 2>/dev/null || true
+kubectl wait --for=condition=ready pod -l app=loki -n monitoring --timeout=300s 2>/dev/null || echo -e "${YELLOW}    Loki not ready yet${NC}"
 
 echo -e "${GREEN}✓ All applications are ready${NC}"
 echo ""

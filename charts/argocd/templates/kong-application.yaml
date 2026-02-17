@@ -1,4 +1,4 @@
-{{- if .Values.applications.kong.enabled }}
+{{- if .Values.global.applications.kong.enabled }}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -9,8 +9,8 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: {{ .Values.git.repoURL }}
-    targetRevision: {{ .Values.git.targetRevision }}
+    repoURL: {{ .Values.global.argocd.repoURL }}
+    targetRevision: {{ .Values.global.argocd.targetRevision }}
     path: charts/kong
     helm:
       valueFiles:
