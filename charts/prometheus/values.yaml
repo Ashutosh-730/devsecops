@@ -1,34 +1,17 @@
-# Use global configuration from values-global.yaml
-# Override with: helm install -f values-global.yaml -f charts/prometheus/values.yaml
-
-replicaCount: 1
-
-image:
-  repository: prom/prometheus
-  tag: v2.45.0
-  pullPolicy: IfNotPresent
+# Prometheus Chart Values
+# Uses global configuration from values-global.yaml
+# Image, retention, scrape intervals, and replica count are inherited from global.applications.prometheus
 
 service:
   type: ClusterIP
   port: 9090
 
-resources:
-  limits:
-    cpu: 500m
-    memory: 512Mi
-  requests:
-    cpu: 250m
-    memory: 256Mi
-
+# Storage configuration - uses global.storage.storageClass and global.storage.sizes.medium
 persistence:
   enabled: true
-  size: 5Gi
-  storageClass: standard
 
-retention: 15d
-
-scrapeInterval: 15s
-evaluationInterval: 15s
+# Resources - uses global.resources.medium
+# Override only if needed for specific requirements
 
 # Scrape configurations
 scrapeConfigs:

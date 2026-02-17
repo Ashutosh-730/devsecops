@@ -6,7 +6,7 @@ metadata:
   labels:
     app: grafana
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.global.applications.grafana.replicaCount | default 1 }}
   selector:
     matchLabels:
       app: grafana
@@ -17,28 +17,28 @@ spec:
     spec:
       containers:
         - name: grafana
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.global.applications.grafana.image.repository }}:{{ .Values.global.applications.grafana.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           ports:
             - name: http
               containerPort: 3000
               protocol: TCP
           env:
             - name: GF_SECURITY_ADMIN_USER
-              value: {{ .Values.global.monitoring.grafana.adminUser | default .Values.admin.user | quote }}
+              value: {{ .Values.global.applications.grafana.adminUser }}
             - name: GF_SECURITY_ADMIN_PASSWORD
-              value: {{ .Values.global.monitoring.grafana.adminPassword | default .Values.admin.password | quote }}
+              value: {{ .Values.global.applications.grafana.adminPassword }}
             - name: GF_INSTALL_PLUGINS
-              value: {{ join "," .Values.plugins }}
+              value: {{ join "," .Values.global.applications.grafana.plugins }}
             - name: GF_SERVER_ROOT_URL
-              value: {{ if .Values.global.kong.enabled }}{{ .Values.global.kong.externalProxyUrl }}/grafana{{ else }}{{ .Values.global.monitoring.grafana.externalUrl | default .Values.env.GF_SERVER_ROOT_URL }}{{ end }}
+              value: {{ if .Values.global.applications.kong.enabled }}{{ .Values.global.applications.kong.externalProxyUrl }}/grafana{{ else }}{{ .Values.global.applications.grafana.externalUrl | default .Values.env.GF_SERVER_ROOT_URL }}{{ end }}
             - name: GF_SERVER_SERVE_FROM_SUB_PATH
-              value: {{ if .Values.global.kong.enabled }}"true"{{ else }}"false"{{ end }}
+              value: {{ if .Values.global.applications.kong.enabled }}"true"{{ else }}"false"{{ end }}
             - name: GF_AUTH_ANONYMOUS_ENABLED
               value: "false"
-            {{- if .Values.global.kong.enabled }}
+            {{- if .Values.global.applications.kong.enabled }}
             - name: GF_SECURITY_CSRF_TRUSTED_ORIGINS
-              value: {{ .Values.global.kong.externalProxyUrl | quote }}
+              value: {{ .Values.global.applications.kong.externalProxyUrl | quote }}
             - name: GF_SECURITY_CSRF_ADDITIONAL_HEADERS
               value: "X-Forwarded-Host"
             {{- end }}
@@ -59,16 +59,18 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 3
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.global.resources.medium | nindent 12 }}
           volumeMounts:
             - name: grafana-storage
               mountPath: /var/lib/grafana
             - name: grafana-datasources
               mountPath: /etc/grafana/provisioning/datasources
+            {{- if .Values.dashboards.kong.enabled }}
             - name: grafana-dashboards-config
               mountPath: /etc/grafana/provisioning/dashboards
-            - name: grafana-dashboards
+            - name: grafana-kong-dashboard
               mountPath: /var/lib/grafana/dashboards
+            {{- end }}
       volumes:
         - name: grafana-storage
           {{- if .Values.persistence.enabled }}
@@ -80,11 +82,13 @@ spec:
         - name: grafana-datasources
           configMap:
             name: grafana-datasources
+        {{- if .Values.dashboards.kong.enabled }}
         - name: grafana-dashboards-config
           configMap:
             name: grafana-dashboards-config
-        - name: grafana-dashboards
+        - name: grafana-kong-dashboard
           configMap:
             name: grafana-kong-dashboard
+        {{- end }}
 
 

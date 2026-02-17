@@ -6,7 +6,7 @@ metadata:
   labels:
     app: jenkins
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.global.applications.jenkins.replicaCount | default 1 }}
   selector:
     matchLabels:
       app: jenkins
@@ -25,8 +25,8 @@ spec:
         runAsUser: 1000
       containers:
         - name: jenkins
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.global.applications.jenkins.image.repository }}:{{ .Values.global.applications.jenkins.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           env:
             - name: JAVA_OPTS
               value: >-
@@ -62,7 +62,7 @@ spec:
             timeoutSeconds: 10
             failureThreshold: 10
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.global.resources.xlarge | nindent 12 }}
           volumeMounts:
             - name: jenkins-home
               mountPath: /var/jenkins_home

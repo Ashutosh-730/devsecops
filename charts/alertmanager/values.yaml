@@ -1,26 +1,17 @@
-replicaCount: 1
-
-image:
-  repository: prom/alertmanager
-  tag: v0.26.0
-  pullPolicy: IfNotPresent
+# AlertManager Chart Values
+# Uses global configuration from values-global.yaml
+# Image and replica count are inherited from global.applications.alertmanager
 
 service:
   type: ClusterIP
   port: 9093
 
-resources:
-  limits:
-    cpu: 200m
-    memory: 256Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi
-
+# Storage configuration - uses global.storage.storageClass and global.storage.sizes.small
 persistence:
   enabled: true
-  size: 2Gi
-  storageClass: standard
+
+# Resources - uses global.resources.small
+# Override only if needed for specific requirements
 
 # AlertManager configuration
 config:
@@ -64,4 +55,3 @@ config:
       target_match:
         severity: 'warning'
       equal: ['alertname', 'cluster', 'service']
-

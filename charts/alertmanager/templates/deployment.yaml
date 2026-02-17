@@ -6,7 +6,7 @@ metadata:
   labels:
     app: alertmanager
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.global.applications.alertmanager.replicaCount | default 1 }}
   selector:
     matchLabels:
       app: alertmanager
@@ -19,13 +19,13 @@ spec:
     spec:
       containers:
         - name: alertmanager
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.global.applications.alertmanager.image.repository }}:{{ .Values.global.applications.alertmanager.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           args:
             - '--config.file=/etc/alertmanager/alertmanager.yml'
             - '--storage.path=/alertmanager'
-            {{- if .Values.global.kong.enabled }}
-            - '--web.external-url=http://localhost:32000/alertmanager'
+            {{- if .Values.global.applications.kong.enabled }}
+            - '--web.external-url={{ .Values.global.applications.alertmanager.externalUrl }}'
             - '--web.route-prefix=/'
             {{- end }}
           ports:
@@ -49,7 +49,7 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 3
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.global.resources.small | nindent 12 }}
           volumeMounts:
             - name: config
               mountPath: /etc/alertmanager

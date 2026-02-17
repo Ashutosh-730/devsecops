@@ -1,31 +1,18 @@
-replicaCount: 1
-
-image:
-  repository: jenkins/jenkins
-  tag: 2.426.1-lts
-  pullPolicy: IfNotPresent
+# Jenkins Chart Values
+# Uses global configuration from values-global.yaml
+# Image, plugins, admin credentials, and replica count are inherited from global.applications.jenkins
 
 service:
   type: ClusterIP
   port: 8080
   agentPort: 50000
 
-admin:
-  user: admin
-  password: admin
-
-resources:
-  limits:
-    cpu: 2000m
-    memory: 4Gi
-  requests:
-    cpu: 500m
-    memory: 2Gi
-
+# Storage configuration - uses global.storage.storageClass and global.storage.sizes.large
 persistence:
   enabled: true
-  size: 10Gi
-  storageClass: standard
+
+# Resources - uses global.resources.xlarge
+# Override only if needed for specific requirements
 
 # Jenkins Configuration as Code (JCasC)
 casc:
@@ -72,14 +59,8 @@ casc:
       globalLibraries:
         libraries: []
 
-# Plugins to install
-plugins:
-  - kubernetes:latest
-  - workflow-aggregator:latest
-  - git:latest
-  - configuration-as-code:latest
-  - prometheus:latest
-  - job-dsl:latest
+# Plugins configuration inherited from global.applications.jenkins.plugins
+# Override only if needed for specific requirements
 
 # Jenkins Jobs Configuration
 jobs:

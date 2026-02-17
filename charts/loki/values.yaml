@@ -1,46 +1,23 @@
-# Use global configuration from values-global.yaml
-# Override with: helm install -f values-global.yaml -f charts/loki/values.yaml
-
-replicaCount: 1
+# Loki Chart Values
+# Uses global configuration from values-global.yaml
+# Images and replica count are inherited from global.applications.loki
 
 loki:
-  image:
-    repository: grafana/loki
-    tag: 2.9.0
-    pullPolicy: IfNotPresent
-  
   service:
     type: ClusterIP
     port: 3100
 
-  resources:
-    limits:
-      cpu: 200m
-      memory: 256Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-
+  # Storage configuration - uses global.storage.storageClass and global.storage.sizes.medium
   persistence:
     enabled: true
-    size: 5Gi
-    storageClass: standard
+
+  # Resources - uses global.resources.small
+  # Override only if needed for specific requirements
 
 promtail:
-  image:
-    repository: grafana/promtail
-    tag: 2.9.0
-    pullPolicy: IfNotPresent
-
-  resources:
-    limits:
-      cpu: 200m
-      memory: 128Mi
-    requests:
-      cpu: 100m
-      memory: 64Mi
-
+  # Resources - uses global.resources.small
+  # Override only if needed for specific requirements
+  
   config:
     lokiAddress: http://loki:3100/loki/api/v1/push
-
 

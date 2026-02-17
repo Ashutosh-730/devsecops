@@ -1,12 +1,6 @@
-# Use global configuration from values-global.yaml
-# Override with: helm install -f values-global.yaml -f charts/kong/values.yaml
-
-replicaCount: 1
-
-image:
-  repository: kong
-  tag: "3.4"
-  pullPolicy: IfNotPresent
+# Kong Chart Values
+# Uses global configuration from values-global.yaml
+# Image, replica count, and postgres credentials are inherited from global.applications.kong
 
 proxy:
   type: ClusterIP
@@ -23,13 +17,11 @@ manager:
   type: ClusterIP
   port: 8002
 
+# Environment configuration (service-specific)
 env:
   database: "postgres"
   pg_host: "kong-postgres"
   pg_port: "5432"
-  pg_database: "kong"
-  pg_user: "kong"
-  pg_password: "kong"
   proxy_access_log: /dev/stdout
   admin_access_log: /dev/stdout
   proxy_error_log: /dev/stderr
@@ -42,8 +34,6 @@ env:
   admin_gui_error_log: /dev/stderr
   admin_gui_api_url: "http://localhost:8001"
   admin_gui_path: "/kongui"
-  # Enable RBAC and Basic Auth for Kong Manager (Enterprise feature)
-  # Note: These features require Kong Enterprise license
   enforce_rbac: "on"
   admin_gui_auth: "basic-auth"
   admin_gui_session_conf: '{"secret":"kong","storage":"kong","cookie_secure":false}'
@@ -63,29 +53,12 @@ plugins:
 declarativeConfig:
   enabled: false
 
+# PostgreSQL configuration
 postgresql:
   enabled: true
   image:
     repository: postgres
     tag: "13"
   port: 5432
-  database: "kong"
-  username: "kong"
-  password: "kong"
   persistence:
     enabled: false
-  resources:
-    limits:
-      cpu: 500m
-      memory: 512Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-
-resources:
-  limits:
-    cpu: 500m
-    memory: 512Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi

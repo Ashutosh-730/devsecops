@@ -6,7 +6,7 @@ metadata:
     app: kong
     release: {{ .Release.Name }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.global.applications.kong.replicaCount | default 1 }}
   selector:
     matchLabels:
       app: kong
@@ -19,8 +19,8 @@ spec:
     spec:
       initContainers:
         - name: kong-migration
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.global.applications.kong.image.repository }}:{{ .Values.global.applications.kong.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           command: [ "/bin/sh", "-c", "kong migrations bootstrap" ]
           env:
             - name: KONG_DATABASE
@@ -30,15 +30,15 @@ spec:
             - name: KONG_PG_PORT
               value: "{{ .Values.env.pg_port }}"
             - name: KONG_PG_DATABASE
-              value: "{{ .Values.env.pg_database }}"
+              value: "{{ .Values.global.applications.kong.postgres.database }}"
             - name: KONG_PG_USER
-              value: "{{ .Values.env.pg_user }}"
+              value: "{{ .Values.global.applications.kong.postgres.username }}"
             - name: KONG_PG_PASSWORD
-              value: "{{ .Values.env.pg_password }}"
+              value: "{{ .Values.global.applications.kong.postgres.password }}"
       containers:
         - name: kong
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.global.applications.kong.image.repository }}:{{ .Values.global.applications.kong.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           env:
             - name: KONG_DATABASE
               value: "{{ .Values.env.database }}"
@@ -47,11 +47,11 @@ spec:
             - name: KONG_PG_PORT
               value: "{{ .Values.env.pg_port }}"
             - name: KONG_PG_DATABASE
-              value: "{{ .Values.env.pg_database }}"
+              value: "{{ .Values.global.applications.kong.postgres.database }}"
             - name: KONG_PG_USER
-              value: "{{ .Values.env.pg_user }}"
+              value: "{{ .Values.global.applications.kong.postgres.username }}"
             - name: KONG_PG_PASSWORD
-              value: "{{ .Values.env.pg_password }}"
+              value: "{{ .Values.global.applications.kong.postgres.password }}"
             - name: KONG_PROXY_ACCESS_LOG
               value: "{{ .Values.env.proxy_access_log }}"
             - name: KONG_ADMIN_ACCESS_LOG
@@ -102,4 +102,4 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.global.resources.medium | nindent 12 }}
