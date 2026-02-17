@@ -46,7 +46,7 @@ data:
     providers:
       - name: 'kong-official'
         orgId: 1
-        folder: 'Kong'
+        folder: ''
         type: file
         disableDeletion: false
         updateIntervalSeconds: 10
