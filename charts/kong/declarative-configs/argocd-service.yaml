@@ -36,5 +36,3 @@ services:
               - "X-Forwarded-Proto:http"
               - "X-Forwarded-Host:localhost:8000"
               - "X-Forwarded-Port:8000"
-
-# Made with Bob

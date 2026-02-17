@@ -113,5 +113,3 @@ echo ""
 echo -e "${GREEN}✓ All services (including ArgoCD) are accessible through Kong API Gateway at http://localhost:8000${NC}"
 echo -e "${YELLOW}Note: All services use ClusterIP and are only accessible via Kong${NC}"
 echo ""
-
-# Made with Bob
