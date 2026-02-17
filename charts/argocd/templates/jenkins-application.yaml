@@ -8,13 +8,16 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  source:
-    repoURL: {{ .Values.global.argocd.repoURL }}
-    targetRevision: {{ .Values.global.argocd.targetRevision }}
-    path: charts/jenkins
-    helm:
-      valueFiles:
-        - ../../values-global.yaml
+  sources:
+    - repoURL: {{ .Values.global.argocd.repoURL }}
+      targetRevision: {{ .Values.global.argocd.targetRevision }}
+      ref: values
+    - repoURL: {{ .Values.global.argocd.repoURL }}
+      targetRevision: {{ .Values.global.argocd.targetRevision }}
+      path: charts/jenkins
+      helm:
+        valueFiles:
+          - $values/values-global.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: cicd
@@ -25,3 +28,5 @@ spec:
     syncOptions:
       - CreateNamespace=true
 {{- end }}
+
+# Made with Bob
