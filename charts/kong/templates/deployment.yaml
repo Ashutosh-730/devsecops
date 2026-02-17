@@ -17,6 +17,10 @@ spec:
       labels:
         app: kong
         release: {{ .Release.Name }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8001"
+        prometheus.io/path: "/metrics"
     spec:
       initContainers:
         - name: kong-migration
@@ -77,6 +81,10 @@ spec:
               value: "{{ .Values.env.admin_gui_api_url }}"
             - name: KONG_ADMIN_GUI_PATH
               value: "{{ .Values.env.admin_gui_path }}"
+            - name: KONG_PLUGINS
+              value: "bundled,prometheus"
+            - name: KONG_STATUS_LISTEN
+              value: "0.0.0.0:8100"
           ports:
             - name: proxy
               containerPort: 8000
@@ -89,6 +97,9 @@ spec:
               protocol: TCP
             - name: manager
               containerPort: 8002
+              protocol: TCP
+            - name: metrics
+              containerPort: 8100
               protocol: TCP
           livenessProbe:
             httpGet:
