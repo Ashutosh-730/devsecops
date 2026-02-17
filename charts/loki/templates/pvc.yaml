@@ -9,12 +9,10 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  {{- if .Values.loki.persistence.storageClass }}
-  storageClassName: {{ .Values.loki.persistence.storageClass }}
-  {{- end }}
+  storageClassName: {{ .Values.global.storage.storageClass }}
   resources:
     requests:
-      storage: {{ .Values.loki.persistence.size }}
+      storage: {{ .Values.global.storage.sizes.medium }}
 {{- end }}
 
 
