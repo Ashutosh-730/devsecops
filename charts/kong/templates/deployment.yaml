@@ -6,7 +6,8 @@ metadata:
     app: kong
     release: {{ .Release.Name }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.global.applications.kong.replicaCount | default 1 }}
+  revisionHistoryLimit: {{ .Values.global.revisionHistoryLimit | default 1 }}
   selector:
     matchLabels:
       app: kong
@@ -16,11 +17,15 @@ spec:
       labels:
         app: kong
         release: {{ .Release.Name }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8001"
+        prometheus.io/path: "/metrics"
     spec:
       initContainers:
         - name: kong-migration
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.global.applications.kong.image.repository }}:{{ .Values.global.applications.kong.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           command: [ "/bin/sh", "-c", "kong migrations bootstrap" ]
           env:
             - name: KONG_DATABASE
@@ -30,15 +35,15 @@ spec:
             - name: KONG_PG_PORT
               value: "{{ .Values.env.pg_port }}"
             - name: KONG_PG_DATABASE
-              value: "{{ .Values.env.pg_database }}"
+              value: "{{ .Values.global.applications.kong.postgres.database }}"
             - name: KONG_PG_USER
-              value: "{{ .Values.env.pg_user }}"
+              value: "{{ .Values.global.applications.kong.postgres.username }}"
             - name: KONG_PG_PASSWORD
-              value: "{{ .Values.env.pg_password }}"
+              value: "{{ .Values.global.applications.kong.postgres.password }}"
       containers:
         - name: kong
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.global.applications.kong.image.repository }}:{{ .Values.global.applications.kong.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           env:
             - name: KONG_DATABASE
               value: "{{ .Values.env.database }}"
@@ -47,11 +52,11 @@ spec:
             - name: KONG_PG_PORT
               value: "{{ .Values.env.pg_port }}"
             - name: KONG_PG_DATABASE
-              value: "{{ .Values.env.pg_database }}"
+              value: "{{ .Values.global.applications.kong.postgres.database }}"
             - name: KONG_PG_USER
-              value: "{{ .Values.env.pg_user }}"
+              value: "{{ .Values.global.applications.kong.postgres.username }}"
             - name: KONG_PG_PASSWORD
-              value: "{{ .Values.env.pg_password }}"
+              value: "{{ .Values.global.applications.kong.postgres.password }}"
             - name: KONG_PROXY_ACCESS_LOG
               value: "{{ .Values.env.proxy_access_log }}"
             - name: KONG_ADMIN_ACCESS_LOG
@@ -76,6 +81,10 @@ spec:
               value: "{{ .Values.env.admin_gui_api_url }}"
             - name: KONG_ADMIN_GUI_PATH
               value: "{{ .Values.env.admin_gui_path }}"
+            - name: KONG_PLUGINS
+              value: "bundled,prometheus"
+            - name: KONG_STATUS_LISTEN
+              value: "0.0.0.0:8100"
           ports:
             - name: proxy
               containerPort: 8000
@@ -88,6 +97,9 @@ spec:
               protocol: TCP
             - name: manager
               containerPort: 8002
+              protocol: TCP
+            - name: metrics
+              containerPort: 8100
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -102,4 +114,4 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.global.resources.medium | nindent 12 }}

@@ -6,7 +6,8 @@ metadata:
   labels:
     app: prometheus
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.global.applications.prometheus.replicaCount | default 1 }}
+  revisionHistoryLimit: {{ .Values.global.revisionHistoryLimit | default 1 }}
   selector:
     matchLabels:
       app: prometheus
@@ -21,17 +22,17 @@ spec:
       serviceAccountName: prometheus
       containers:
         - name: prometheus
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.global.applications.prometheus.image.repository }}:{{ .Values.global.applications.prometheus.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           args:
             - '--config.file=/etc/prometheus/prometheus.yml'
             - '--storage.tsdb.path=/prometheus'
-            - '--storage.tsdb.retention.time={{ .Values.retention }}'
+            - '--storage.tsdb.retention.time={{ .Values.global.applications.prometheus.retention }}'
             - '--web.console.libraries=/usr/share/prometheus/console_libraries'
             - '--web.console.templates=/usr/share/prometheus/consoles'
             - '--web.enable-lifecycle'
-            {{- if .Values.global.kong.enabled }}
-            - '--web.external-url=http://localhost:32000/prometheus'
+            {{- if .Values.global.applications.kong.enabled }}
+            - '--web.external-url={{ .Values.global.applications.prometheus.externalUrl }}'
             - '--web.route-prefix=/'
             {{- end }}
           ports:
@@ -55,7 +56,7 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 3
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.global.resources.medium | nindent 12 }}
           volumeMounts:
             - name: config
               mountPath: /etc/prometheus

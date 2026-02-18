@@ -13,11 +13,7 @@ data:
       - name: {{ .Values.datasources.prometheus.name }}
         type: {{ .Values.datasources.prometheus.type }}
         access: {{ .Values.datasources.prometheus.access }}
-        {{- if .Values.global.kong.enabled }}
-        url: {{ .Values.global.kong.proxyUrl }}/prometheus
-        {{- else }}
-        url: {{ .Values.global.monitoring.prometheus.url | default .Values.datasources.prometheus.url }}
-        {{- end }}
+        url: {{ .Values.datasources.prometheus.url }}
         isDefault: {{ .Values.datasources.prometheus.isDefault }}
         editable: true
     {{- end }}
@@ -25,13 +21,13 @@ data:
       - name: {{ .Values.datasources.loki.name }}
         type: {{ .Values.datasources.loki.type }}
         access: {{ .Values.datasources.loki.access }}
-        # Loki always uses direct cluster URL (no Kong routing needed)
-        url: {{ .Values.global.monitoring.loki.url | default .Values.datasources.loki.url }}
+        url: {{ .Values.datasources.loki.url }}
         isDefault: false
         editable: true
         jsonData:
           maxLines: 1000
     {{- end }}
+{{- if .Values.dashboards.kong.enabled }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -44,7 +40,7 @@ data:
   dashboards.yaml: |
     apiVersion: 1
     providers:
-      - name: 'default'
+      - name: 'kong-official'
         orgId: 1
         folder: ''
         type: file
@@ -63,78 +59,9 @@ metadata:
     app: grafana
     dashboard: kong
 data:
-  kong-dashboard.json: |
-    {
-      "dashboard": {
-        "id": null,
-        "uid": "kong-metrics",
-        "title": "Kong Metrics",
-        "tags": ["kong", "api-gateway"],
-        "timezone": "browser",
-        "schemaVersion": 16,
-        "version": 0,
-        "refresh": "10s",
-        "panels": [
-          {
-            "id": 1,
-            "title": "HTTP Requests Total",
-            "type": "graph",
-            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
-            "targets": [
-              {
-                "expr": "sum(rate(kong_http_requests_total[5m])) by (service, route, code)",
-                "legendFormat": "{{ "{{" }}service{{ "}}" }}/{{ "{{" }}route{{ "}}" }} - {{ "{{" }}code{{ "}}" }}"
-              }
-            ]
-          },
-          {
-            "id": 2,
-            "title": "Request Latency",
-            "type": "graph",
-            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
-            "targets": [
-              {
-                "expr": "histogram_quantile(0.95, sum(rate(kong_request_latency_ms_bucket[5m])) by (service, route, le))",
-                "legendFormat": "{{ "{{" }}service{{ "}}" }}/{{ "{{" }}route{{ "}}" }} p95"
-              }
-            ]
-          },
-          {
-            "id": 3,
-            "title": "Bandwidth",
-            "type": "graph",
-            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
-            "targets": [
-              {
-                "expr": "sum(rate(kong_bandwidth_bytes[5m])) by (service, route, direction)",
-                "legendFormat": "{{ "{{" }}service{{ "}}" }}/{{ "{{" }}route{{ "}}" }} - {{ "{{" }}direction{{ "}}" }}"
-              }
-            ]
-          },
-          {
-            "id": 4,
-            "title": "Datastore Status",
-            "type": "stat",
-            "gridPos": {"h": 4, "w": 6, "x": 12, "y": 8},
-            "targets": [
-              {
-                "expr": "kong_datastore_reachable"
-              }
-            ]
-          },
-          {
-            "id": 5,
-            "title": "Active Connections",
-            "type": "stat",
-            "gridPos": {"h": 4, "w": 6, "x": 18, "y": 8},
-            "targets": [
-              {
-                "expr": "kong_nginx_connections_total{state=\"active\"}"
-              }
-            ]
-          }
-        ]
-      }
-    }
-
+  kong-vitals-11870.json: |-
+{{ .Files.Get "dashboards/kong-vitals-11870.json" | indent 4 }}
+  kong-official-17269.json: |-
+{{ .Files.Get "dashboards/kong-official-17269.json" | indent 4 }}
+{{- end }}
 

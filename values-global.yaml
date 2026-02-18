@@ -3,93 +3,30 @@
 
 # Global settings
 global:
+  # ArgoCD configuration
+  argocd:
+    repoURL: https://github.com/Ashutosh-730/devsecops
+    targetRevision: ashutosh-dev
+  
   # Kubernetes cluster configuration
   clusterDomain: cluster.local
   
-  # Namespace configuration
-  namespaces:
-    kong: kong
-    monitoring: monitoring
-    security: security
-    cicd: cicd
+  # Image Pull Policy
+  imagePullPolicy: IfNotPresent
   
-  # Kong Gateway Integration
-  kong:
-    enabled: true  # Set to false for direct access, true to route all services through Kong Gateway
-    namespace: kong
-    proxyService: kong-proxy
-    proxyPort: 8000
-    adminService: kong-admin
-    adminPort: 8001
-    managerPort: 8002
-    # Internal cluster URL for Kong proxy
-    proxyUrl: http://kong-proxy.kong.svc.cluster.local:8000
-    # External access URLs (when using port-forward or NodePort)
-    externalProxyUrl: http://localhost:8000
-    externalAdminUrl: http://localhost:8001
-    externalManagerUrl: http://localhost:8002
-  
-  # Monitoring Stack Configuration
-  monitoring:
-    prometheus:
-      enabled: true
-      namespace: monitoring
-      service: prometheus
-      port: 9090
-      # Direct access URL
-      url: http://prometheus.monitoring.svc.cluster.local:9090
-      # External access
-      externalUrl: http://localhost:32090
-      nodePort: 32090
-    
-    grafana:
-      enabled: true
-      namespace: monitoring
-      service: grafana
-      port: 3000
-      # Direct access URL
-      url: http://grafana.monitoring.svc.cluster.local:3000
-      # External access
-      externalUrl: http://localhost:32300
-      nodePort: 32300
-      # Admin credentials
-      adminUser: admin
-      adminPassword: admin
-    
-    loki:
-      enabled: true
-      namespace: monitoring
-      service: loki
-      port: 3100
-      # Direct access URL
-      url: http://loki.monitoring.svc.cluster.local:3100
-    
-    alertmanager:
-      enabled: false
-      namespace: monitoring
-      service: alertmanager
-      port: 9093
-      url: http://alertmanager.monitoring.svc.cluster.local:9093
-  
-  # Security & Identity Management
-  security:
-    namespace: security
+  # Deployment Configuration
+  revisionHistoryLimit: 1  # Keep only 1 old ReplicaSet for rollback
   
   # Storage Configuration
   storage:
     storageClass: standard
-    # Default sizes
-    prometheus:
-      size: 5Gi
-    grafana:
-      size: 5Gi
-    loki:
-      size: 5Gi
-    kong:
-      postgres:
-        size: 5Gi
+    # Default sizes for different application types
+    sizes:
+      small: 2Gi    # alertmanager
+      medium: 5Gi   # grafana, prometheus, loki
+      large: 10Gi   # jenkins
   
-  # Resource Defaults
+  # Resource Defaults (can be referenced by name in individual charts)
   resources:
     small:
       limits:
@@ -114,42 +51,89 @@ global:
       requests:
         cpu: 500m
         memory: 512Mi
+    
+    xlarge:
+      limits:
+        cpu: 2000m
+        memory: 4Gi
+      requests:
+        cpu: 500m
+        memory: 2Gi
   
-  # Image Pull Policy
-  imagePullPolicy: IfNotPresent
+  # Common service configuration
+  services:
+    type: ClusterIP
   
-  # Security Context
-  securityContext:
-    runAsNonRoot: true
-    runAsUser: 1000
-    fsGroup: 1000
-  
-  # Service Account
-  serviceAccount:
-    create: true
-    automountServiceAccountToken: true
-
-# Chart-specific overrides (optional)
-# These can be used to override global settings for specific charts
-
-# Kong specific settings
-kong:
-  replicaCount: 1
-  database: postgres
-  
-# Prometheus specific settings  
-prometheus:
-  retention: 15d
-  scrapeInterval: 15s
-  evaluationInterval: 15s
-
-# Grafana specific settings
-grafana:
-  plugins:
-    - grafana-piechart-panel
-    - grafana-clock-panel
-
-# Loki specific settings
-loki:
-  retention: 168h  # 7 days
-
+  # Application configuration
+  applications:
+    kong:
+      enabled: true
+      replicaCount: 1
+      externalProxyUrl: http://localhost:8000
+      image:
+        repository: kong
+        tag: "3.4"
+      postgres:
+        database: kong
+        username: kong
+        password: kong  # TODO: Move to secrets
+    
+    grafana:
+      enabled: true
+      replicaCount: 1
+      adminUser: admin
+      adminPassword: admin  # TODO: Move to secrets
+      externalUrl: http://localhost:8000/grafana
+      image:
+        repository: grafana/grafana
+        tag: 10.2.0
+      plugins:
+        - grafana-piechart-panel
+        - grafana-clock-panel
+    
+    prometheus:
+      enabled: true
+      replicaCount: 1
+      externalUrl: http://localhost:8000/prometheus
+      image:
+        repository: prom/prometheus
+        tag: v2.45.0
+      retention: 15d
+      scrapeInterval: 15s
+      evaluationInterval: 15s
+    
+    alertmanager:
+      enabled: true
+      replicaCount: 1
+      externalUrl: http://localhost:8000/alertmanager
+      image:
+        repository: prom/alertmanager
+        tag: v0.26.0
+    
+    jenkins:
+      enabled: true
+      replicaCount: 1
+      adminUser: admin
+      adminPassword: admin  # TODO: Move to secrets
+      externalUrl: http://localhost:8000/jenkins
+      image:
+        repository: jenkins/jenkins
+        tag: 2.426.1-lts
+      plugins:
+        - kubernetes:latest
+        - workflow-aggregator:latest
+        - git:latest
+        - configuration-as-code:latest
+        - prometheus:latest
+        - job-dsl:latest
+    
+    loki:
+      enabled: true
+      replicaCount: 1
+      image:
+        repository: grafana/loki
+        tag: 2.9.0
+      promtail:
+        image:
+          repository: grafana/promtail
+          tag: 2.9.0

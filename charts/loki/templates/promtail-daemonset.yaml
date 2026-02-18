@@ -17,8 +17,8 @@ spec:
       serviceAccountName: promtail
       containers:
         - name: promtail
-          image: "{{ .Values.promtail.image.repository }}:{{ .Values.promtail.image.tag }}"
-          imagePullPolicy: {{ .Values.promtail.image.pullPolicy }}
+          image: "{{ .Values.global.applications.loki.promtail.image.repository }}:{{ .Values.global.applications.loki.promtail.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           args:
             - -config.file=/etc/promtail/promtail.yaml
           volumeMounts:
@@ -30,7 +30,7 @@ spec:
               mountPath: /var/lib/docker/containers
               readOnly: true
           resources:
-            {{- toYaml .Values.promtail.resources | nindent 12 }}
+            {{- toYaml .Values.global.resources.small | nindent 12 }}
       volumes:
         - name: config
           configMap:

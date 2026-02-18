@@ -1,0 +1,7 @@
+# ArgoCD Applications Chart Values
+# This chart manages ArgoCD Application resources
+# Uses global configuration from values-global.yaml
+
+# Git configuration is inherited from global.argocd
+# Application enable/disable flags are inherited from global.applications.*.enabled
+# No local overrides needed - all configuration is in values-global.yaml

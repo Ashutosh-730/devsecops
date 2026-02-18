@@ -1,22 +1,18 @@
-replicaCount: 1
+# OPA Chart Values
+# Uses global configuration from values-global.yaml
 
 image:
   repository: openpolicyagent/opa
   tag: "0.60.0-static"
-  pullPolicy: IfNotPresent
+  # Uses global.imagePullPolicy
 
 service:
   type: NodePort
   port: 8181
   nodePort: 32010
 
-resources:
-  limits:
-    cpu: 500m
-    memory: 256Mi
-  requests:
-    cpu: 100m
-    memory: 64Mi
+# Resources - uses global.resources.small
+# Override only if needed for specific requirements
 
 # Default policy configmap
 defaultPolicy:

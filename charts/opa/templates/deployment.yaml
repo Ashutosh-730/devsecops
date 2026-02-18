@@ -6,7 +6,8 @@ metadata:
     app: opa
     release: {{ .Release.Name }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.global.applications.loki.replicaCount | default 1 }}
+  revisionHistoryLimit: {{ .Values.global.revisionHistoryLimit | default 1 }}
   selector:
     matchLabels:
       app: opa
@@ -20,7 +21,7 @@ spec:
       containers:
         - name: opa
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           args:
             - "run"
             - "--server"
@@ -45,7 +46,7 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.global.resources.small | nindent 12 }}
           {{- if .Values.defaultPolicy.enabled }}
           volumeMounts:
             - name: policies

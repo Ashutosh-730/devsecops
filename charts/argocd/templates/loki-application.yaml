@@ -1,0 +1,31 @@
+{{- if .Values.global.applications.loki.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: loki
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  # Multi-source configuration: First source provides access to values-global.yaml via $values reference
+  sources:
+    - repoURL: {{ .Values.global.argocd.repoURL }}
+      targetRevision: {{ .Values.global.argocd.targetRevision }}
+      ref: values  # Creates $values reference for accessing repository root files
+    - repoURL: {{ .Values.global.argocd.repoURL }}
+      targetRevision: {{ .Values.global.argocd.targetRevision }}
+      path: charts/loki
+      helm:
+        valueFiles:
+          - $values/values-global.yaml  # References values-global.yaml from repository root
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+{{- end }}

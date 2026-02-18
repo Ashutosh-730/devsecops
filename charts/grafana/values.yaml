@@ -1,26 +1,19 @@
-# Use global configuration from values-global.yaml
-# Override with: helm install -f values-global.yaml -f charts/grafana/values.yaml
-
-replicaCount: 1
-
-image:
-  repository: grafana/grafana
-  tag: 10.2.0
-  pullPolicy: IfNotPresent
+# Grafana Chart Values
+# Uses global configuration from values-global.yaml
+# Image, plugins, admin credentials, and replica count are inherited from global.applications.grafana
 
 service:
   type: ClusterIP
   port: 3000
 
-admin:
-  user: admin
-  password: admin
+# Storage configuration - uses global.storage.storageClass and global.storage.sizes.medium
+persistence:
+  enabled: true
 
-# Kong Gateway Integration (uses global config)
-kong:
-  enabled: false
-  proxyUrl: http://kong-proxy.kong.svc.cluster.local:8000
+# Resources - uses global.resources.medium
+# Override only if needed for specific requirements
 
+# Datasource configuration (service-specific)
 datasources:
   prometheus:
     enabled: true
@@ -36,36 +29,10 @@ datasources:
     url: http://loki.monitoring.svc.cluster.local:3100
     access: proxy
 
+# Dashboard configuration (service-specific)
 dashboards:
-  enabled: true
   kong:
     enabled: true
     gnetId: 7424
     revision: 5
     datasource: Prometheus
-
-persistence:
-  enabled: true
-  size: 5Gi
-  storageClass: standard
-
-resources:
-  limits:
-    cpu: 500m
-    memory: 512Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi
-
-plugins:
-  - grafana-piechart-panel
-  - grafana-clock-panel
-
-env:
-  GF_SECURITY_ADMIN_USER: admin
-  GF_SECURITY_ADMIN_PASSWORD: admin
-  GF_INSTALL_PLUGINS: grafana-piechart-panel,grafana-clock-panel
-  GF_SERVER_ROOT_URL: http://localhost:8000/grafana
-  GF_SERVER_SERVE_FROM_SUB_PATH: "true"
-  GF_AUTH_ANONYMOUS_ENABLED: "false"
-
